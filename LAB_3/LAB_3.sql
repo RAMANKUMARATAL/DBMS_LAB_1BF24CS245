@@ -41,7 +41,7 @@ INSERT INTO Branch VALUES
 ('HDFC_KarolBagh', 'Delhi', 35000000),
 ('Axis_CP', 'Delhi', 45000000),
 ('Canara_Jayanagar', 'Bangalore', 30000000);
-
+select *from Branch;
 INSERT INTO BankAccount VALUES
 (1, 'SBI_ResidencyRoad', 25000),
 (2, 'SBI_ResidencyRoad', 42000),
@@ -53,14 +53,14 @@ INSERT INTO BankAccount VALUES
 (8, 'SBI_ResidencyRoad', 22000),
 (9, 'Axis_CP', 27000),
 (10, 'SBI_ResidencyRoad', 40000);
-
+select *from BankAccount;
 INSERT INTO BankCustomer VALUES
 ('Avinash', 'Bull_Temple_Road', 'Bangalore'),
 ('Dinesh', 'Bannergatta_Road', 'Bangalore'),
 ('Mohan', 'NationalCollege_Road', 'Bangalore'),
 ('Nikil', 'Akbar_Road', 'Delhi'),
 ('Ravi', 'Prithviraj_Road', 'Delhi');
-
+select *from BankCustomer;
 INSERT INTO Depositer VALUES
 ('Avinash', 8),
 ('Dinesh', 2),
@@ -69,14 +69,14 @@ INSERT INTO Depositer VALUES
 ('Nikil', 4),
 ('Ravi', 5),
 ('Avinash', 1);
-
+select *from Depositer;
 INSERT INTO Loan VALUES
 (101, 'SBI_ResidencyRoad', 80000),
 (102, 'ICICI_MG', 120000),
 (103, 'Axis_CP', 95000),
 (104, 'HDFC_KarolBagh', 70000),
 (105, 'Canara_Jayanagar', 65000);
-
+select *from Loan;
 SELECT branch_name, (assets / 100000) AS "Assets in Lakhs" FROM Branch;
 
 SELECT d.customer_name, b.branch_name, COUNT(*) AS Num_Accounts FROM Depositer d JOIN BankAccount b ON d.accno = b.accno GROUP BY d.customer_name, b.branch_name
@@ -89,7 +89,7 @@ SELECT * FROM Branch_Loan_Summary;
 
 SELECT DISTINCT c.customer_name, b.balance FROM BankCustomer c JOIN Depositer d ON c.customer_name = d.customer_name JOIN BankAccount b ON d.accno = b.accno WHERE c.customer_city = 'Bangalore' AND b.balance > 20000;
 
--- specific branch
+
 SELECT DISTINCT d.customer_name
 FROM Depositer d
 JOIN BankAccount ba ON d.accno = ba.accno
@@ -102,19 +102,18 @@ HAVING COUNT(DISTINCT b.branch_name) = (
     WHERE branch_city = 'Bangalore'
 );
 
--- loan but no account
+
 SELECT DISTINCT l.customer_name FROM (SELECT DISTINCT d.customer_name FROM Depositer d) AS account_holders RIGHT JOIN (SELECT DISTINCT bc.customer_name FROM BankCustomer bc WHERE EXISTS (SELECT 1 FROM Loan ln
 JOIN Branch br ON ln.branch_name = br.branch_name WHERE bc.customer_name IN (SELECT borrower_name FROM Borrower WHERE loan_number = ln.loan_number))) AS l ON account_holders.customer_name = l.customer_name
 WHERE account_holders.customer_name IS NULL;
 
- -- assets greater than delhi
+
 SELECT branch_name, assets FROM Branch WHERE assets > ALL (SELECT assets FROM Branch WHERE branch_city = 'Delhi');
 
--- delete data of delhi branch so first
--- delete from Depositer table
+
 DELETE FROM Depositer WHERE accno IN (SELECT ba.accno FROM BankAccount ba JOIN Branch b ON ba.branch_name = b.branch_name
 WHERE b.branch_city = 'Delhi'
 );
--- delete from BankAccount table
+
 DELETE FROM BankAccount WHERE branch_name IN (SELECT branch_name FROM Branch WHERE branch_city = 'Delhi'
 );
